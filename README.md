@@ -1,4 +1,7 @@
 # Task 1
+
+---
+
 # Task 2
 ## 1. High-Level Overview of Multi-Task Learning
 In multi-task learning, you share a common backbone (basemodel) while having separate task-specific heads. For this sentence transformer:
@@ -11,19 +14,21 @@ In multi-task learning, you share a common backbone (basemodel) while having sep
 
 Because these tasks have different label spaces and sometimes different input/output shapes (especially if one task is sentence-level and another is token-level), we design separate heads while reusing the same backbone.
 
+---
+
 ## 2. Changes to the Architecture
 ### 2.1 Shared Encoder (Backbone + Pooling)
 1. Transformer Encoder (e.g., bert-base-uncased)
-  - Converts tokenized input into hidden states.
+    - Converts tokenized input into hidden states.
 2. Pooling Layer (optional, depending on the task)
-  - For sentence-level tasks, you might use [CLS] pooling or average pooling.
-  - For token-level tasks, you often use the entire hidden state sequence without an additional pooling layer.
+    - For sentence-level tasks, you might use [CLS] pooling or average pooling.
+    - For token-level tasks, you often use the entire hidden state sequence without an additional pooling layer.
 
 ### 2.2 Task A Head: Sentence Classification
 - Input: A pooled sentence embedding (shape: [batch_size, hidden_dim]).
 - Architecture:
-  - Dense layer(s) (e.g., nn.Linear(hidden_dim, hidden_dim/2) + activation).
-  - Output classification layer (e.g., nn.Linear(hidden_dim/2, num_classes)), with a softmax or cross-entropy loss.
+    - Dense layer(s) (e.g., nn.Linear(hidden_dim, hidden_dim/2) + activation).
+    - Output classification layer (e.g., nn.Linear(hidden_dim/2, num_classes)), with a softmax or cross-entropy loss.
 - Loss: Typically cross-entropy for classification.
 
 
@@ -33,16 +38,18 @@ Depends on the nature of the second task:
 Case 1: Named Entity Recognition (NER)
 - Input: The full sequence of hidden states from the Transformer (shape: [batch_size, seq_len, hidden_dim]).
 - Architecture:
-  - Possibly a CRF layer on top or a simple nn.Linear(hidden_dim, num_labels) for each token.
-  - If using a CRF, you’ll need a separate decoding mechanism.
+    - Possibly a CRF layer on top or a simple nn.Linear(hidden_dim, num_labels) for each token.
+    - If using a CRF, you’ll need a separate decoding mechanism.
 - Loss:
-  - Token-level cross-entropy (each token predicted independently) or CRF-based loss.
+    - Token-level cross-entropy (each token predicted independently) or CRF-based loss.
 
 ### 2.4 Shared vs. Independent Parameters
 - Backbone: Shared across tasks.
 - Heads: Independent parameters for each task.
 - Potential to share early layers of the heads if tasks are similar, but typically each head is distinct.
 
+
+---
 
 # Task 3: Training Considerations
 
