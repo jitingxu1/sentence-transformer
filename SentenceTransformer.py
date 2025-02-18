@@ -34,3 +34,22 @@ class SentenceTransformer(nn.Module):
             raise ValueError("Invalid pooling method")
         
         return sentence_embeddings
+
+
+if __name__ == "__main__":
+    # Instantiate the model
+    model = SentenceTransformer(model_name='distilbert-base-uncased', pooling='mean')
+    
+    # Example sentences
+    sentences = [
+        "This is the first sentence.",
+        "Sentence transformers create embeddings for entire sentences.",
+        "I love Python for machine learning!"
+    ]
+    
+    # Generate sentence embeddings
+    with torch.no_grad():
+        embeddings = model(sentences)
+    
+    print("Embeddings shape:", embeddings.shape)
+    print("Sample embedding:", embeddings[0][:10])
