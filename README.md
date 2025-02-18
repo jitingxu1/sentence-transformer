@@ -1,4 +1,11 @@
 # Task 1
+A Sentence Transformer takes an input sentence (or sentences) and encodes it into a fixed-dimensional embedding that captures the semantic meaning of the sentence. While under the hood, we often use a pretrained Transformer (e.g., BERT, RoBERTa, DistilBERT), we also need a pooling strategy to convert the final hidden states into a single vector.
+
+Typical steps:
+
+Pass the tokenized sentence through the Transformer.
+Extract the hidden states.
+Aggregate/pool them (e.g., CLS token, average pooling, max pooling) to get a single sentence-level embedding
 
 ---
 
