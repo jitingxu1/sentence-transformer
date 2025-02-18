@@ -177,3 +177,97 @@ then move into how to apply **transfer learning** effectively, including which l
 
 ---
 
+
+# Task 4: Training Loop Implementation (BONUS)
+
+This section outlines how a **training loop** might be structured for the **Multi-Task Learning (MTL)** scenario described in Task 2. We focus on **conceptual explanations** rather than actual code, highlighting:
+
+- **Hypothetical data handling**  
+- **Forward pass logic**  
+- **Metrics** for evaluating each task  
+
+> **Note:** We do not actually train the model here. 
+
+---
+
+## 1. Handling Hypothetical Data
+
+1. **Multiple Datasets**  
+   - You typically have **one dataset per task**.  
+   - **Task A (Sentence Classification)** might consist of `(sentence, label)` pairs, where each label is an integer class (e.g., 0, 1, 2).  
+   - **Task B (Token Classification)** might have `(sentence, [token_labels])`, where `[token_labels]` aligns with the tokens in the sentence.
+
+2. **Combining Data or Interleaving**  
+   - For **true multi-task learning**, you can **interleave** batches of Task A and Task B in the same training loop.  
+   - Alternatively, you can **sample** from each task in proportion to the size or importance of that task.
+
+3. **Batch Construction**  
+   - Each batch (for each task) should contain the **input text** and **task-specific labels** (e.g., integer class labels for classification, token labels for NER).  
+   - You also need a way to **distinguish which task** a given batch belongs to, if you’re using a single loop that processes batches from different tasks.
+
+4. **Key Assumption**:  
+   - There is **no real-world conflict** in mixing these datasets, and each dataset is **sufficiently large** or **representative** for the tasks.
+
+---
+
+## 2. Forward Pass Considerations
+
+1. **Shared Encoder**  
+   - You have a **pretrained transformer** that converts tokens into contextualized embeddings.  
+   - This encoder is shared by **both Task A and Task B**.
+
+2. **Separate Heads**  
+   - **Task A Head** (Sentence Classification):  
+     - Applies to the **pooled** encoder output (e.g., the `[CLS]` token or average of all tokens).  
+     - Produces **logits** of shape `(batch_size, num_classes_taskA)`.
+   - **Task B Head** (Token Classification):  
+     - Applies to the **full sequence** of embeddings (token-level).  
+     - Produces **logits** of shape `(batch_size, seq_len, num_labels_taskB)`.
+
+3. **Selecting the Right Head**  
+   - During training, the loop must specify **which head** to use based on the **task**.  
+   - You might store a “task” key in each batch to tell the model which **forward logic** to follow.
+
+4. **Key Assumption**:  
+   - The model can handle varying shapes (sentence-level vs. token-level) by switching to the correct output head without conflict.
+
+---
+
+## 3. Metrics
+
+1. **Task-Specific Evaluation**  
+   - **Task A (Classification)**: Typically uses **accuracy**, **precision**, **recall**, **F1**, etc., at the **sentence level**.  
+   - **Task B (Token-Level)**: Often needs **token-level accuracy** or an **F1 score** (especially for NER with BIO tags).
+
+2. **Periodic Assessment**  
+   - After some batches (or at the end of each epoch), evaluate **both tasks** on their respective validation sets.  
+   - Keeps track of performance so that one task doesn’t degrade while optimizing for the other.
+
+3. **Combined or Separate Metrics**  
+   - You can track **separate metrics** for each task, or consider a **joint metric** if tasks share an overarching goal.  
+   - Typically, separate metrics are easier to interpret.
+
+4. **Key Assumption**:  
+   - Each task has a **reliable evaluation metric** and **sufficient validation data** to measure progress accurately.
+
+---
+
+## 4. Final Thoughts
+
+By **conceptually** interleaving Task A and Task B within one training loop, you:
+- **Share** the transformer encoder, learning general linguistic patterns.  
+- **Specialize** via separate heads for distinct label spaces (classification vs. token-level tagging).  
+- **Track** separate metrics, ensuring neither task degrades while focusing on the other.
+
+> A real-world implementation would require **careful batching** (especially for token-level tasks) and **robust evaluation** to confirm that **both tasks** benefit from multi-task learning.
+
+---
+
+### **Key Takeaways**
+- **MTL Setup**: Use a **shared encoder** with **task-specific heads**.  
+- **Data Handling**: Keep tasks separate but interleave them in a **single loop**.  
+- **Forward Pass**: Decide **which head** to run based on the current task.  
+- **Metrics**: Maintain **separate metrics** to ensure each task is improving.  
+- **Loss and Updates**: Optionally **weight losses** or **alternate** tasks to balance learning.
+
+
